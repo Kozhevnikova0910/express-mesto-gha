@@ -15,7 +15,7 @@ module.exports.getUser = (req, res, next) => {
         next(err);
       } else res.send(user);
     })
-    .catch(() => { next(); });
+    .catch(next);
 };
 
 module.exports.createUser = (req, res, next) => {
