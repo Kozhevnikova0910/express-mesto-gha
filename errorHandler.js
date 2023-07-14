@@ -3,8 +3,11 @@ const NOT_FOUND_CODE = 404;
 const COMMON_ERROR_CODE = 500;
 
 const errorHandler = (err, req, res, next) => {
+  if (err.name === 'CastError') {
+    res.status(BAD_REQUEST).send( { message: err.message } );
+  }
   if (err.name === 'NotFoundError') {
-    res.status(NOT_FOUND_CODE).send( { "message": err.message } );
+    res.status(NOT_FOUND_CODE).send( { message: err.message } );
   }
   if (err.name === 'ValidationError') {
     res.status(BAD_REQUEST).send( { "message": err.message } );

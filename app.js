@@ -21,6 +21,12 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+app.all('*', (req, res, next) => {
+  const err = new Error('Неверно указан путь');
+  err.name = 'NotFoundError';
+  next(err);
+});
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {});
