@@ -32,6 +32,11 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true, runValidators: true, },
 )
   .then((card) => {
+    if (!card) {
+      const err = new Error('Карточка не найдена');
+      err.name = 'NotFoundError';
+      next(err);
+    }
     res.send(card);
   })
   .catch(next);
@@ -42,6 +47,11 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true, runValidators: true, },
 )
   .then((card) => {
+    if (!card) {
+      const err = new Error('Карточка не найдена');
+      err.name = 'NotFoundError';
+      next(err);
+    }
     res.send(card);
   })
   .catch(next);
