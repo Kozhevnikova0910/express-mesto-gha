@@ -12,7 +12,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === 'ValidationError') {
     res.status(BAD_REQUEST).send({ message: err.message });
   } else {
-    res.status(COMMON_ERROR_CODE).send({ message: err.message });
+    res.status(COMMON_ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
   }
   next();
 };
