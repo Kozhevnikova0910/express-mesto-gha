@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -44,7 +45,13 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email
+    }))
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким email уже существует'));
@@ -66,12 +73,40 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch(next);
 };
 
+// module.exports.login = (req, res, next) => {
+//   const { email, password } = req.body;
+//   console.log(1)
+//   User.findUserByCredentials(email, password)
+//     .then((user) => {
+//       const token = jwt.sign({ _id: user._id }, 'not-secret-key', { expiresIn: '7d' });
+//       res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
+//       res.send({ token });
+//     })
+//     .catch(next);
+// };
+
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findUserByCredentials(email, password)
+  console.log(1)
+  User.findOne({ email }, { runValidators: true })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        next(UnauthorizedError('Неверные данные пользователя'));
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            next(UnauthorizedError('Неверные данные пользователя'));
+          }
+          return user;
+        });
+    })
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'not-secret-key', { expiresIn: '7d' });
-      res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true })
+      res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.send({ token });
     })
     .catch(next);
 };

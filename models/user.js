@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/;
+const UnauthorizedError = require('../errors/unauthorized-err');
+const reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.\S{2,}|www\.[a-zA-Z0-9]+\.\S{2,})/;
 
 const userSchema = new mongoose.Schema(
   {
@@ -44,19 +45,20 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password')
+  return this.findOne({ email }, { runValidators: true })
+    .select('+password')
     .then((user) => {
       if (!user) {
-        const err = new Error('Неверные данные пользователя');
-        err.name = 'Unauthorized';
-        return Promise.reject(err);
+        return Promise.reject(
+          new UnauthorizedError('Неверные данные пользователя'),
+        );
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            const err = new Error('Неверные данные пользователя');
-            err.name = 'Unauthorized';
-            return Promise.reject(err);
+            return Promise.reject(
+              new UnauthorizedError('Неверные данные пользователя'),
+            );
           }
           return user;
         });
