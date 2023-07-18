@@ -73,37 +73,12 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch(next);
 };
 
-// module.exports.login = (req, res, next) => {
-//   const { email, password } = req.body;
-//   console.log(1)
-//   User.findUserByCredentials(email, password)
-//     .then((user) => {
-//       const token = jwt.sign({ _id: user._id }, 'not-secret-key', { expiresIn: '7d' });
-//       res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
-//       res.send({ token });
-//     })
-//     .catch(next);
-// };
-
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   console.log(1)
-  User.findOne({ email }, { runValidators: true })
-    .select('+password')
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        next(UnauthorizedError('Неверные данные пользователя'));
-      }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            next(UnauthorizedError('Неверные данные пользователя'));
-          }
-          return user;
-        });
-    })
-    .then((user) => {
+      console.log(2)
       const token = jwt.sign({ _id: user._id }, 'not-secret-key', { expiresIn: '7d' });
       res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
       res.send({ token });

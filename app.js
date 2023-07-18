@@ -15,13 +15,13 @@ mongoose.connect(CONNECTION_STRING);
 
 app.use(express.json());
 
-app.post('/signin', celebrate({
+app.use('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   })
 }), login);
-app.post('/signup', celebrate({
+app.use('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
@@ -31,10 +31,10 @@ app.post('/signup', celebrate({
   })
 }), createUser);
 
-app.use(require('./middlewares/auth'));
+// app.use(require('./middlewares/auth'));
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+app.use('/users', require('./middlewares/auth'), require('./routes/users'));
+app.use('/cards', require('./middlewares/auth'), require('./routes/cards'));
 
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
