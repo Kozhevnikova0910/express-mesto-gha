@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const errorHandler = require('./errorHandler');
 const NotFoundError = require('./errors/not-found-err');
 const { createUser, login } = require('./controllers/users');
@@ -11,9 +12,11 @@ const CONNECTION_STRING = 'mongodb://localhost:27017/mestodb';
 
 const app = express();
 
-mongoose.connect(CONNECTION_STRING);
-
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+mongoose.connect(CONNECTION_STRING);
 
 app.use('/signin', celebrate({
   body: Joi.object().keys({
@@ -31,10 +34,10 @@ app.use('/signup', celebrate({
   })
 }), createUser);
 
-// app.use(require('./middlewares/auth'));
+app.use(require('./middlewares/auth'));
 
-app.use('/users', require('./middlewares/auth'), require('./routes/users'));
-app.use('/cards', require('./middlewares/auth'), require('./routes/cards'));
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));

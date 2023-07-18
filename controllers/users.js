@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
-const UnauthorizedError = require("../errors/unauthorized-err");
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -22,13 +21,15 @@ module.exports.getUser = (req, res, next) => {
 };
 
 module.exports.getMe = (req, res, next) => {
+  console.log( 11 )
   const { _id } = req.user;
+  console.log( 22 )
   User.find({ _id })
     .then((user) => {
       if (!user) {
         next(new NotFoundError('Пользователь не найден'));
       }
-      return res.send(...user);
+      return res.send(user);
     })
     .catch(next);
 };
