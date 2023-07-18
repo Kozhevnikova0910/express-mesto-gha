@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const UnauthorizedError = require('../errors/unauthorized-err');
+
 const reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.\S{2,}|www\.[a-zA-Z0-9]+\.\S{2,})/;
 
 const userSchema = new mongoose.Schema(
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema(
       validate: {
         validator: (url) => reg.test(url),
         message: 'Неверный формат ссылки',
-      }
+      },
     },
     email: {
       type: String,
@@ -46,20 +47,16 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  console.log(11)
   return this.findOne({ email }, { runValidators: true })
     .select('+password')
     .then((user) => {
-      console.log(22)
       if (!user) {
         return Promise.reject(
           new UnauthorizedError('Неверные данные пользователя'),
         );
       }
-      console.log(33)
       return bcrypt.compare(password, user.password)
         .then((matched) => {
-          console.log(44)
           if (!matched) {
             return Promise.reject(
               new UnauthorizedError('Неверные данные пользователя'),

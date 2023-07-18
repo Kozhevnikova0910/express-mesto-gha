@@ -1,10 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { celebrate, Joi, errors } = require('celebrate');
 const errorHandler = require('./errorHandler');
 const NotFoundError = require('./errors/not-found-err');
 const { createUser, login } = require('./controllers/users');
-const { celebrate, Joi, errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.\S{2,}|www\.[a-zA-Z0-9]+\.\S{2,})/;
@@ -22,7 +22,7 @@ app.use('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
-  })
+  }),
 }), login);
 app.use('/signup', celebrate({
   body: Joi.object().keys({
@@ -31,7 +31,7 @@ app.use('/signup', celebrate({
     avatar: Joi.string().regex(reg),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
-  })
+  }),
 }), createUser);
 
 app.use(require('./middlewares/auth'));

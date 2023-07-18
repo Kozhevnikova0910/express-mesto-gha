@@ -1,6 +1,6 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
 
@@ -21,9 +21,7 @@ module.exports.getUser = (req, res, next) => {
 };
 
 module.exports.getMe = (req, res, next) => {
-  console.log( 11 )
   const { _id } = req.user;
-  console.log( 22 )
   User.find({ _id })
     .then((user) => {
       if (!user) {
@@ -35,11 +33,12 @@ module.exports.getMe = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  console.log(1)
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   bcrypt.hash(password, 10)
-    .then(hash => User.create({
+    .then((hash) => User.create({
       name,
       about,
       avatar,
@@ -51,7 +50,7 @@ module.exports.createUser = (req, res, next) => {
       name: user.name,
       about: user.about,
       avatar: user.avatar,
-      email: user.email
+      email: user.email,
     }))
     .catch((err) => {
       if (err.code === 11000) {
@@ -76,10 +75,8 @@ module.exports.updateAvatar = (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-  console.log(1)
   User.findUserByCredentials(email, password)
     .then((user) => {
-      console.log(2)
       const token = jwt.sign({ _id: user._id }, 'not-secret-key', { expiresIn: '7d' });
       res.cookie('jwt', token, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true });
       res.send({ token });
