@@ -5,7 +5,7 @@ const allowedCors = [
   'http://localhost:3000',
   'localhost:3000',
   'https://kozhevnikova.students.nomoredomains.xyz',
-  'http://kozhevnikova.students.nomoredomains.xyz'
+  'http://kozhevnikova.students.nomoredomains.xyz',
 ];
 
 module.exports = (req, res, next) => {
@@ -16,15 +16,11 @@ module.exports = (req, res, next) => {
 
   const { method } = req;
 
-  const DEFAULT_ALLOWED_METHODS = "GET,HEAD,PUT,PATCH,POST,DELETE";
-
-  if (method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
-  }
-
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
   const requestHeaders = req.headers['access-control-request-headers'];
 
   if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
     res.header('Access-Control-Allow-Headers', requestHeaders);
     return res.end();
   }
