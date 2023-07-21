@@ -5,6 +5,7 @@ const { celebrate, Joi, errors } = require('celebrate');
 const errorHandler = require('./errorHandler');
 const NotFoundError = require('./errors/not-found-err');
 const { createUser, login } = require('./controllers/users');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const reg = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.\S{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.\S{2,}|www\.[a-zA-Z0-9]+\.\S{2,})/;
@@ -17,6 +18,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(CONNECTION_STRING);
+
+app.use(requestLogger); // подключаем логгер запросов
 
 app.use('/signin', celebrate({
   body: Joi.object().keys({
@@ -42,6 +45,8 @@ app.use('/cards', require('./routes/cards'));
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors());
 
